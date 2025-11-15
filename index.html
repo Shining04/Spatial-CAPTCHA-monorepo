@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spatial-CAPTCHA - 봇은 풀 수 없는 3D 캡챠</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a href="#" class="logo">🔐 Spatial-CAPTCHA</a>
+      <a href="#cta" class="cta-button">지금 시작하기</a>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="section hero">
+      <div class="container">
+        <h1>봇은 풀 수 없습니다.<br>사람은 쉽게 풉니다.</h1>
+        <p class="lead">가장 진보된 3D 공간 인식 기술로 웹사이트를 안전하게 보호하세요.</p>
+        <a href="#demo" class="cta-button">라이브 데모 체험하기</a>
+      </div>
+    </section>
+
+    <section id="demo" class="section demo">
+      <div class="container">
+        <h2>라이브 데모</h2>
+        <p>Spatial-CAPTCHA가 실제로 어떻게 동작하는지 지금 바로 경험해 보세요.</p>
+        
+        <div class="demo-box">
+          <div 
+            class="spatial-captcha" 
+            data-api-key="sk-spatial-captcha-123456789" style="width: 100%; margin: auto;"
+          ></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section features">
+      <div class="container">
+        <h2>비교할 수 없는 보안성</h2>
+        <p>단순한 이미지/텍스트 인식을 넘어선, 실제 공간 지각 능력을 요구합니다.</p>
+        
+        <div class="features-grid">
+          <div class="feature-item">
+            <h3>강력한 봇 차단</h3>
+            <p>2D 기반의 AI는 3D 모델의 공간적 관계를 추론하기 매우 어렵습니다. 99.9%의 자동화 봇을 차단합니다.</p>
+          </div>
+          <div class="feature-item">
+            <h3>쉬운 설치</h3>
+            <p>단 두 줄의 코드를 복사/붙여넣기 하는 것만으로 사이트의 보안 등급을 즉시 업그레이드할 수 있습니다.</p>
+          </div>
+          <div class="feature-item">
+            <h3>뛰어난 사용자 경험</h3>
+            <p>지루하고 알아보기 힘든 캡챠는 이제 그만. 사용자는 3D 모델을 회전하며 재미있는 경험을 하게 됩니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section how-to">
+      <div class="container">
+        <h2>2줄이면 설치 끝</h2>
+        <p>사이트의 HTML에 아래 코드를 복사하여 붙여넣으세요.</p>
+        
+        <h3>1. 캡챠를 표시할 DIV 추가하기</h3>
+        <pre><code>&lt;div class="spatial-captcha" data-api-key="[발급받은 API 키]"&gt;&lt;/div&gt;</code></pre>
+
+        <h3>2. 스크립트 태그 추가하기</h3>
+        <pre><code>&lt;script src="https://spatial-captcha-frontend.vercel.app/widget.js" defer&gt;&lt;/script&gt;</code></pre>
+      </div>
+    </section>
+
+    <section class="section pricing">
+      <div class="container">
+        <h2>간단한 가격 플랜</h2>
+        <div class="pricing-grid">
+          <div class="pricing-plan">
+            <h3>Free (무료)</h3>
+            <p class="price">₩0</p>
+            <p>월 1,000회 검증<br>개인 프로젝트용</p>
+          </div>
+          <div class="pricing-plan">
+            <h3>Pro (프로)</h3>
+            <p class="price">₩10,000 / 월</p>
+            <p>월 100,000회 검증<br>상업용 웹사이트</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cta" class="section cta">
+      <div class="container">
+        <h2>지금 바로 시작하세요</h2>
+        <p>몇 분 만에 웹사이트의 보안을 강화하고 사용자 경험을 업그레이드하세요.</p>
+        <a href="#cta" class="cta-button">무료로 API 키 발급받기</a>
+      </div>
+    </section>
+  </main>
+
+  <script 
+    src="https://spatial-captcha-frontend.vercel.app/widget.js" defer
+  ></script>
+
+</body>
+</html>
