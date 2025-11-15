@@ -44,10 +44,21 @@
       </div>
 
       <div class="dashboard-card">
-        <h2>🔑 내 API 키</h2>
-        <p>아직 API 키가 없습니다. 버튼을 눌러 생성하세요.</p>
-        <button id="create-key-button" disabled>API 키 생성하기 (준비 중)</button>
-      </div>
+  <h2>🔑 내 API 키</h2>
+
+  <div id="api-key-display" class="hidden">
+    <p>API 키가 생성되었습니다. 이 키를 복사하여 사용하세요.</p>
+    <pre id="api-key-value"></pre>
+    <p class="warning">이 키는 한 번만 표시됩니다. 안전한 곳에 보관하세요.</p>
+  </div>
+
+  <div id="api-key-prompt">
+    <p>아직 API 키가 없습니다. 버튼을 눌러 생성하세요.</p>
+    <button id="create-key-button">API 키 생성하기</button>
+  </div>
+
+  <p id="api-key-message" class="error-message"></p>
+</div>
 
     </div>
 

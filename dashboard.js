@@ -20,6 +20,14 @@ const authMessage = document.getElementById('auth-message');
 const welcomeEmail = document.getElementById('welcome-email');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
+// ... (welcomeEmail, emailInput, passwordInput 다음)
+
+// API 키 섹션 요소
+const createKeyButton = document.getElementById('create-key-button');
+const apiKeyDisplay = document.getElementById('api-key-display');
+const apiKeyPrompt = document.getElementById('api-key-prompt');
+const apiKeyValue = document.getElementById('api-key-value');
+const apiKeyMessage = document.getElementById('api-key-message');
 
 // --- 3. UI 상태 변경 함수 ---
 function showDashboard(user) {
@@ -102,12 +110,88 @@ logoutButton.addEventListener('click', async () => {
 
 // --- 5. 페이지 로드 시 세션 확인 ---
 // (가장 중요) 페이지가 로드되거나, 로그인이 감지되면 실행됩니다.
+// ...
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' || event === 'INITIAL_USER') {
     // 로그인 되었음!
     showDashboard(session.user);
+
+    // [!!! 추가된 부분 !!!]
+    // API 키 생성 버튼에 이벤트 리스너를 추가합니다.
+    addApiKeyButtonListener(session); 
+
   } else if (event === 'SIGNED_OUT') {
+// ...
     // 로그아웃 되었음!
     showAuthForm();
   }
 });
+
+// ... (supabaseClient.auth.onAuthStateChange ... 코드 끝)
+
+
+// --- 6. API 키 생성 기능 ---
+
+/**
+ * API 키를 화면에 표시하는 함수
+ */
+function displayApiKey(apiKey) {
+  apiKeyPrompt.classList.add('hidden');
+  apiKeyDisplay.classList.remove('hidden');
+  apiKeyValue.textContent = apiKey;
+}
+
+/**
+ * 'API 키 생성하기' 버튼에 클릭 이벤트를 추가하는 함수
+ */
+function addApiKeyButtonListener(session) {
+  if (!createKeyButton) return;
+
+  createKeyButton.addEventListener('click', async () => {
+    try {
+      // 0. 버튼 비활성화 및 메시지 표시
+      createKeyButton.disabled = true;
+      apiKeyMessage.textContent = 'API 키 생성 중... (최대 30초 소요)';
+      apiKeyMessage.className = 'success-message';
+
+      // 1. (보안) 현재 로그인한 사용자의 '인증 토큰' 가져오기
+      // 이 토큰을 Supabase 함수로 보내 '본인'임을 증명합니다.
+      const { data: { session: currentSession }, error: sessionError } = await supabaseClient.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const userToken = currentSession.access_token;
+
+      // 2. Supabase 함수('create-api-key')를 호출합니다.
+      const { data, error: funcError } = await supabaseClient.functions.invoke(
+        'create-api-key', // [!!!] 우리가 배포한 함수의 이름
+        {
+          // (중요) 'Authorization' 헤더에 토큰을 담아 보냅니다.
+          headers: {
+            'Authorization': `Bearer ${userToken}`
+          }
+        }
+      );
+
+      if (funcError) {
+        // Supabase 함수 자체가 실패한 경우 (예: 500 오류)
+        throw new Error(`함수 호출 실패: ${funcError.message}`);
+      }
+
+      if (data.error) {
+        // 함수 *내부*에서 오류가 발생한 경우 (예: 인증 실패, DB 오류)
+        throw new Error(`API 키 생성 실패: ${data.error}`);
+      }
+
+      // 3. 성공!
+      const newApiKey = data.apiKey;
+      displayApiKey(newApiKey); // 화면에 새 API 키 표시
+      apiKeyMessage.textContent = ''; // 성공 시 메시지 숨김
+
+    } catch (error) {
+      console.error('API 키 생성 오류:', error);
+      apiKeyMessage.textContent = error.message;
+      apiKeyMessage.className = 'error-message';
+      createKeyButton.disabled = false; // 실패 시 버튼 다시 활성화
+    }
+  });
+}

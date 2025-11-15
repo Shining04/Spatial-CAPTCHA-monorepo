@@ -89,3 +89,19 @@ button:disabled {
   margin-top: 1rem;
   font-weight: 600;
 }
+
+/* style.css (맨 아래 추가) */
+pre#api-key-value {
+  background: #eee;
+  padding: 1rem;
+  border-radius: 8px;
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  word-wrap: break-word;
+}
+.warning {
+  font-size: 0.9rem;
+  color: #dc3545;
+  font-weight: 600;
+  margin-top: 1rem;
+}
