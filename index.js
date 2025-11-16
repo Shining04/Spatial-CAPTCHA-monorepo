@@ -1,98 +1,65 @@
-// ... (THREE require)
-const { Pool } = require('pg'); // <-- DB와 통신하기 위한 라이브러리
+// ===================================================================
+// Spatial-CAPTCHA API (v1.0) - 최종본
+// ===================================================================
 
-// index.js (아래 코드를 모두 복사해서 붙여넣으세요)
-// index.js (최상단)
-
-// 이 키가 우리 서비스의 마스터 키입니다. 
-// 나중에는 이 키를 '환경 변수'로 숨겨야 하지만, 지금은 테스트를 위해 여기에 둡니다.
-
-// 1. 설치한 라이브러리들 불러오기
+// --- 1. 라이브러리 임포트 ---
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const THREE = require('three');
+const { Pool } = require('pg'); // DB(Supabase) 드라이버
 
+// --- 2. 앱 및 상수 설정 ---
 const app = express();
-// ...
 const port = process.env.PORT || 3000;
+const FREE_TIER_QUOTA = 1000; // 'free' 플랜의 월간 한도
 
-// [!!! v1.0 추가 !!!]
-// 'free' 플랜의 월간 사용량 한도를 정의합니다.
-// (나중에 Render 환경 변수로 빼도 좋습니다.)
-const FREE_TIER_QUOTA = 1000; // 예: 월 1,000회
+// --- 3. 환경 변수 및 DB 연결 ---
+const MASTER_API_KEY_UNUSED = process.env.MASTER_API_KEY; // (v1.0에선 사용 안함)
+const DATABASE_URL = process.env.DATABASE_URL;
 
-// [!!! v1.0 추가 !!!]
-// DB 연결 풀을 생성합니다.
-const pool = new Pool({
-// ...
-  connectionString: process.env.DATABASE_URL,
-});
-// 1. Render 대시보드에서 'MASTER_API_KEY'라는 이름의 변수를 찾아 읽어옵니다.
-const MASTER_API_KEY = process.env.MASTER_API_KEY; 
-
-// ...
-// 1. Render 대시보드에서 'MASTER_API_KEY'라는 이름의 변수를 찾아 읽어옵니다.
-    
-// 2. [v1.0 수정] VERCEL_APP_URL 변수를 삭제합니다. (DB에서 동적으로 처리)
-
-// 3. (안전장치) MASTER_API_KEY만 검사합니다.
-if (!MASTER_API_KEY) { // <-- [수정 1]
-  console.error(" [치명적 오류] : MASTER_API_KEY 환경 변수가 설정되지 않았습니다!");
-} else {
-  console.log("[환경 변수] 마스터 API 키 로드 성공 (***...)" + MASTER_API_KEY.slice(-4));
+if (!DATABASE_URL) {
+  console.error("[치명적 오류] : DATABASE_URL 환경 변수가 설정되지 않았습니다!");
 }
 
-// --- CORS 설정 (v1.0 최종 수정) ---
-// [수정 2] corsOptions 객체를 삭제합니다.
-// [수정 3] app.use(cors())를 호출하여 "모든 출처"의 '사전 요청(Preflight)'을 허용합니다.
-// (보안 검사는 2차 관문인 'DB 문지기'가 담당하므로 안전합니다.)
-app.use(cors()); 
-app.use(express.json()); 
+// DB 커넥션 풀 생성
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+});
 
-// 7. [v1.0 수정] OPTIONS 요청 핸들러도 cors()로 변경
-app.options('/api/v1/create', cors()); // <-- [수정 4]
-app.options('/api/v1/verify', cors()); // <-- [수정 5]
+// --- 4. CORS 및 미들웨어 설정 ---
+// (v1.0 수정) 모든 출처의 '사전 요청(Preflight)'을 허용합니다.
+// (실제 보안 검사는 'DB 문지기'가 담당합니다.)
+app.use(cors());
+app.use(express.json());
+app.options('/api/v1/create', cors());
+app.options('/api/v1/verify', cors());
 
-// 8. [필수] API 키 인증 '문지기' (DB 연동 버전)
-// (이 'DB 문지기'가 2차 관문 역할을 하여, 허용된 도메인만 통과시킵니다.)
-// ... (이하 'DB 문지기' 코드는 그대로 둡니다) ...
-// ---
-
-// 3. 임시 데이터 저장소 (서버가 켜져 있는 동안에만 정답을 기억함)
-// 나중에는 이 부분을 Redis 같은 DB로 바꾸면 됩니다.
+// --- 5. 임시 세션 저장소 ---
 const sessionStore = {};
 
-// 4. script.js에서 가져온 헬퍼 함수들 (Node.js 버전)
-// 각도를 라디안으로 변환
+// --- 6. 헬퍼 함수 (각도 계산) ---
 function degToRad(degrees) {
   return degrees * (Math.PI / 180);
 }
-
-// 두 숫자 사이의 랜덤 값 생성
 function randFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-// ... (app.options... 코드 끝)
-
-// --- API 키 인증 미들웨어 (문지기) ---
-// /api/v1/ 로 시작하는 모든 요청은 이 코드를 먼저 통과해야 합니다.
-// 8. [필수] API 키 인증 '문지기' (DB 연동 버전)
-// (async 함수로 변경되었습니다)
-// index.js의 'DB 문지기' (app.use('/api/v1', ...)) 함수 전체를 이걸로 교체하세요.
-
-// 8. [필수] API 키 인증 '문지기' (v1.0 결제/한도 검사 버전)
+// ===================================================================
+// 7. [핵심] DB 문지기 (v1.0 - 한도 검사 버전)
+// ===================================================================
+// /api/v1/ 로 시작하는 모든 요청은 이 '문지기'를 먼저 통과해야 합니다.
 app.use('/api/v1', async (req, res, next) => {
   try {
     const apiKey = req.header('X-API-Key');
-    const origin = req.header('Origin'); 
+    const origin = req.header('Origin'); // 요청이 시작된 사이트 주소
 
     if (!apiKey) {
       return res.status(401).json({ message: "인증 실패: API 키가 누락되었습니다." });
     }
 
-    // 1. [v1.0 수정] DB에서 고객의 모든 정보를 조회합니다.
+    // 1. DB에서 고객 정보 조회
     const query = "SELECT * FROM customers WHERE api_key = $1";
     const result = await pool.query(query, [apiKey]);
 
@@ -101,26 +68,24 @@ app.use('/api/v1', async (req, res, next) => {
       return res.status(401).json({ message: "인증 실패: 유효하지 않은 API 키입니다." });
     }
 
-    const customer = result.rows[0]; // 고객 정보 (plan, usage_count 등)
+    const customer = result.rows[0];
 
-    // 2. [v1.0 수정] 도메인 검사 (배열 검사)
+    // 2. 도메인 검사 (배열에 포함되어 있는지)
     if (!customer.allowed_domain || !customer.allowed_domain.includes(origin)) {
       console.warn(`[DB 인증 실패] 허용되지 않은 도메인: ${origin} (허용 목록: [${customer.allowed_domain}])`);
       return res.status(401).json({ message: "인증 실패: 허용되지 않은 도메인입니다." });
     }
 
-    // 3. [v1.0 추가] 사용량 한도(Quota) 검사
+    // 3. 사용량 한도(Quota) 검사
     if (customer.plan === 'free' && customer.usage_count >= FREE_TIER_QUOTA) {
       console.warn(`[한도 초과] 'free' 플랜 고객(${apiKey.slice(-4)})이 한도(${FREE_TIER_QUOTA})를 초과했습니다.`);
-      // 429 Too Many Requests (너무 많은 요청) 오류를 반환
       return res.status(429).json({ message: "사용량 한도 초과: 'Pro' 플랜으로 업그레이드하세요." });
     }
 
     // 4. 모든 인증 통과!
-    // [v1.0 추가] 다음 단계(/create, /verify)에서 고객 정보를 다시 조회하지 않도록,
-    // 'req' 객체에 고객 정보를 실어 보냅니다.
-    req.customer = customer;
-    next(); 
+    // 다음 단계(/create)에서 사용하도록 'req' 객체에 고객 정보(API 키)를 실어 보냅니다.
+    req.customer_api_key = customer.api_key;
+    next();
 
   } catch (error) {
     console.error("[DB 문지기 오류]", error);
@@ -128,25 +93,18 @@ app.use('/api/v1', async (req, res, next) => {
   }
 });
 
-
-// 5. 캡챠 챌린지 생성 API (POST /api/v1/create)
-// ...
-// index.js 파일에서 app.post('/api/v1/create', ...) 함수 전체를 이걸로 교체하세요.
-
-// index.js의 '/api/v1/create' 함수 전체를 이걸로 교체하세요.
-
+// ===================================================================
+// 8. 캡챠 챌린지 생성 API (v1.0 - 사용량 카운트 버전)
+// ===================================================================
 app.post('/api/v1/create', async (req, res) => {
-  // [!!! v1.0 수정 !!!]
-  // '문지기'가 통과시킨 고객 정보를 req 객체에서 받습니다.
-  const customerApiKey = req.customer.api_key; 
-  
-  // (트랜잭션 시작) - DB 작업을 묶어서 처리 (선택 사항이지만 권장)
+  // '문지기'가 통과시킨 고객 API 키를 받습니다.
+  const customerApiKey = req.customer_api_key; 
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN'); // 트랜잭션 시작
 
-    // 1. DB의 'models' 테이블에서 모델 1개를 랜덤으로 가져옵니다.
+    // 1. DB에서 랜덤 모델 1개 가져오기
     const modelQuery = "SELECT model_url FROM models ORDER BY RANDOM() LIMIT 1";
     const modelResult = await client.query(modelQuery);
 
@@ -155,83 +113,78 @@ app.post('/api/v1/create', async (req, res) => {
     }
     const selectedModelUrl = modelResult.rows[0].model_url;
 
-    // 2. 고유한 세션 ID 생성
+    // 2. 세션 ID 생성
     const sessionId = uuidv4();
 
-    // 3. 무작위 정답 각도 생성
-    const targetRotation = { /* ... (각도 생성 로직은 동일) ... */ };
+    // 3. [NaN 오류 수정] 무작위 정답 각도 생성
+    const targetRotation = {
+      x: degToRad(randFloat(-90, 90)),
+      y: degToRad(randFloat(-90, 90)),
+      z: degToRad(randFloat(-45, 45))
+    };
 
-    // 4. 임시 저장소에 [세션ID]와 [정답]을 저장
+    // 4. 임시 저장소에 정답 저장
     sessionStore[sessionId] = targetRotation;
 
-    // 5. [v1.0 추가] 캡챠가 생성되었으므로, 고객의 사용량(usage_count)을 +1 업데이트합니다.
+    // 5. 고객 사용량(usage_count) +1 업데이트
     const updateUsageQuery = "UPDATE customers SET usage_count = usage_count + 1 WHERE api_key = $1";
     await client.query(updateUsageQuery, [customerApiKey]);
 
-    // 6. 모든 DB 작업이 성공했으므로, 트랜잭션을 '커밋' (확정)합니다.
+    // 6. DB 작업 확정
     await client.query('COMMIT'); 
     
-    // 7. 클라이언트에게 응답을 보냅니다.
+    // 7. 클라이언트에 챌린지 정보 전송
     res.status(201).json({ 
       session_id: sessionId,
-      target_rotation: targetRotation,
+      target_rotation: targetRotation, // '각도'가 포함된 객체
       model_url: selectedModelUrl
     });
 
     console.log(`[v1.0 챌린지 생성] 모델: ${selectedModelUrl}, 고객: ${customerApiKey.slice(-4)}`);
 
   } catch (error) {
-    // [v1.0 추가] 오류 발생 시 모든 DB 작업을 '롤백' (취소)합니다.
     await client.query('ROLLBACK'); 
     console.error("[Create API 오류]", error);
     res.status(500).json({ message: "서버 내부 오류 (Create)" });
   } finally {
-    // [v1.0 추가] 사용한 DB 연결을 반납합니다.
     client.release(); 
   }
 });
 
-// 6. 캡챠 검증 API (POST /api/v1/verify)
+// ===================================================================
+// 9. 캡챠 검증 API (v0.2 - 변경 없음)
+// ===================================================================
 app.post('/api/v1/verify', (req, res) => {
   try {
-    // 1. 클라이언트가 보낸 데이터 받기
     const { session_id, user_rotation } = req.body;
 
-    // 2. 세션 ID가 없거나, 저장소에 정답이 없으면 -> 실패
     if (!session_id || !sessionStore[session_id]) {
       return res.status(400).json({ message: "유효하지 않은 세션입니다." });
     }
 
-    // 3. 저장소에서 정답 각도 꺼내기
     const targetRotation = sessionStore[session_id];
 
-    // 4. script.js의 로직과 동일하게 오차 각도 계산
-    // (Three.js의 Quaternion을 사용하여 두 각도의 차이를 계산)
+    // ... (Three.js 각도 비교 로직) ...
     const userQuaternion = new THREE.Quaternion().setFromEuler(
       new THREE.Euler(user_rotation.x, user_rotation.y, user_rotation.z)
     );
     const targetQuaternion = new THREE.Quaternion().setFromEuler(
       new THREE.Euler(targetRotation.x, targetRotation.y, targetRotation.z)
     );
-
     const angleRadians = userQuaternion.angleTo(targetQuaternion);
-    const angleDegrees = THREE.MathUtils.radToDeg(angleRadians); // 라디안 -> 각도
+    const angleDegrees = THREE.MathUtils.radToDeg(angleRadians);
+    
+    const toleranceDegrees = 35; 
 
-    // 5. 서버에서 허용 오차 설정
-    const toleranceDegrees = 35; // 35도까지 봐줌 (나중에 조절 가능)
-
-    // 6. 검증 (성공/실패)
     if (angleDegrees < toleranceDegrees) {
-      // 성공!
+      // 성공
       console.log(`[${session_id}] 검증 성공! (오차: ${angleDegrees.toFixed(1)}°)`);
       res.json({
         verified: true,
         error_angle: angleDegrees,
         tolerance: toleranceDegrees
       });
-      // (보안) 검증에 성공했으니 임시 저장소에서 즉시 삭제
-      delete sessionStore[session_id];
-
+      delete sessionStore[session_id]; // 성공 시 세션 삭제
     } else {
       // 실패
       console.log(`[${session_id}] 검증 실패. (오차: ${angleDegrees.toFixed(1)}°)`);
@@ -248,10 +201,9 @@ app.post('/api/v1/verify', (req, res) => {
   }
 });
 
-// 7. 서버 실행
+// ===================================================================
+// 10. 서버 실행
+// ===================================================================
 app.listen(port, () => {
-  console.log(`🚀 Spatial-CAPTCHA API 서버가 http://localhost:${port} 에서 실행 중입니다.`);
-  console.log("테스트용 API 엔드포인트:");
-  console.log("  - 챌린지 생성: POST http://localhost:3000/api/v1/create");
-  console.log("  - 챌린지 검증: POST http://localhost:3000/api/v1/verify");
+  console.log(`🚀 Spatial-CAPTCHA API 서버가 (v1.0) http://localhost:${port} 에서 실행 중입니다.`);
 });
