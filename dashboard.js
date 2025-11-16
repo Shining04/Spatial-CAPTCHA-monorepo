@@ -38,6 +38,14 @@ const domainForm = document.getElementById('domain-form');
 const domainInput = document.getElementById('domain-input');
 const domainMessage = document.getElementById('domain-message');
 const domainLoadingMessage = document.getElementById('domain-loading-message');
+// ... (domainLoadingMessage 다음)
+
+// v1.0 플랜 섹션 요소
+const planSection = document.getElementById('plan-section');
+const planName = document.getElementById('plan-name');
+const usageCount = document.getElementById('usage-count');
+const usageLimit = document.getElementById('usage-limit');
+const upgradeButton = document.getElementById('upgrade-button');
 const apiKeyLoadingMessage = document.getElementById('api-key-loading-message');
 
 // --- 3. UI 상태 변경 함수 ---
@@ -219,33 +227,42 @@ function addApiKeyButtonListener(session) {
  * RLS (행 수준 보안)를 이용해 'customers' 테이블에서
  * 현재 로그인한 사용자의 API 키와 도메인 목록을 가져옵니다.
  */
+// dashboard.js의 'loadCustomerData' 함수 전체를 이걸로 교체하세요.
+
+/**
+ * RLS (행 수준 보안)를 이용해 'customers' 테이블에서
+ * 현재 로그인한 사용자의 모든 정보(API 키, 도메인, 플랜)를 가져옵니다.
+ */
 async function loadCustomerData(user) {
   apiKeyLoadingMessage.classList.remove('hidden');
   domainLoadingMessage.classList.remove('hidden');
   domainSection.classList.add('hidden');
+  planSection.classList.add('hidden'); // [v1.0] 플랜 섹션 숨기기
 
   try {
-    // 1. (보안) Supabase는 RLS 덕분에 'auth.uid() = user_id' 조건에
-    // 맞는 데이터만 자동으로 반환합니다.
+    // 1. [v1.0 수정] DB에서 고객의 모든 정보를 가져옵니다.
     const { data, error } = await supabaseClient
-      .from('customers')          // 'customers' 테이블에서
-      .select('api_key, allowed_domain') // 이 두 컬럼을 선택
-      .single();                  // 단 하나의 줄(row)만 가져옴
+      .from('customers')
+      .select('api_key, allowed_domain, plan, usage_count') // [v1.0] plan, usage_count 추가
+      .single(); // (RLS가 .eq('user_id', user.id)를 대신합니다)
 
     if (error && error.code !== 'PGRST116') {
       // 'PGRST116'는 "결과 없음(0건)" 오류입니다. 이건 정상입니다.
-      // 그 외의 DB 오류는 여기서 처리합니다.
       throw new Error(`DB 조회 실패: ${error.message}`);
     }
 
     if (data) {
       // --- 2. 고객 데이터가 있는 경우 (키 이미 발급) ---
-      displayApiKey(data.api_key); // API 키 표시
-      renderDomainList(data.allowed_domain || []); // 도메인 목록 표시
+      displayApiKey(data.api_key); 
+      renderDomainList(data.allowed_domain || []);
+      
+      // [v1.0 추가] 플랜 및 사용량 UI 업데이트
+      renderPlanUsage(data.plan, data.usage_count);
 
       apiKeyLoadingMessage.classList.add('hidden');
       domainLoadingMessage.classList.add('hidden');
       domainSection.classList.remove('hidden');
+      planSection.classList.remove('hidden'); // [v1.0] 플랜 섹션 표시
 
     } else {
       // --- 3. 고객 데이터가 없는 경우 (신규 가입) ---
@@ -370,3 +387,30 @@ domainList.addEventListener('click', async (e) => {
     await updateDomainsInDatabase(currentDomains);
   }
 });
+
+// dashboard.js 파일 맨 마지막에 추가하세요.
+
+// --- 9. (v1.0) 플랜 및 사용량 UI 렌더링 ---
+
+/**
+ * (v1.0) DB에서 읽어온 플랜과 사용량 정보를 UI에 반영합니다.
+ */
+function renderPlanUsage(plan = 'free', count = 0) {
+  let limit = 1000; // 'free' 플랜 기본 한도
+  planName.textContent = 'Free';
+  planName.style.color = '#0056b3'; // 기본 파란색
+
+  if (plan === 'pro') {
+    planName.textContent = 'Pro';
+    planName.style.color = '#28a745'; // 'Pro'는 초록색
+    limit = 100000; // 'pro' 플랜 한도 (예시)
+    upgradeButton.classList.add('hidden'); // 'Pro'는 업그레이드 버튼 숨김
+  } else {
+    upgradeButton.classList.remove('hidden'); // 'Free'는 업그레이드 버튼 표시
+  }
+
+  usageCount.textContent = count.toLocaleString(); // 1000 -> 1,000
+  usageLimit.textContent = limit.toLocaleString();
+  
+  // (추후 사용량 바(bar) 업데이트 로직 추가)
+}

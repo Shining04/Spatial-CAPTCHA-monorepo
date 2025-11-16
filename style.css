@@ -153,3 +153,34 @@ pre#api-key-value {
   width: auto;
   flex-shrink: 0; /* 버튼 줄어들지 않게 */
 }
+
+/* style.css (맨 아래 추가) */
+
+/* --- v1.0 플랜 관리 스타일 --- */
+#plan-section {
+  margin-top: 2rem;
+}
+
+.plan-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: #e6f7ff; /* 하늘색 배경 */
+  border: 1px solid #b3e0ff;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.plan-info .plan-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0056b3;
+}
+
+#upgrade-button {
+  background-color: #28a745; /* 초록색 */
+  color: white;
+  width: auto;
+  flex-shrink: 0;
+}
