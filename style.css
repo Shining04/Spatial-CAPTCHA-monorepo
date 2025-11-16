@@ -105,3 +105,51 @@ pre#api-key-value {
   font-weight: 600;
   margin-top: 1rem;
 }
+
+/* style.css (맨 아래 추가) */
+
+/* --- v0.4 도메인 관리 스타일 --- */
+#domain-section {
+  margin-top: 2rem;
+}
+
+#domain-list {
+  margin: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.domain-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.domain-item button {
+  width: auto;
+  background-color: #dc3545;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+#domain-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+#domain-form input {
+  flex-grow: 1; /* 입력창이 남은 공간 다 차지 */
+}
+
+#domain-form button {
+  width: auto;
+  flex-shrink: 0; /* 버튼 줄어들지 않게 */
+}

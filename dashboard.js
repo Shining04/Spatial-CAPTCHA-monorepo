@@ -29,6 +29,17 @@ const apiKeyPrompt = document.getElementById('api-key-prompt');
 const apiKeyValue = document.getElementById('api-key-value');
 const apiKeyMessage = document.getElementById('api-key-message');
 
+// ... (apiKeyMessage 다음)
+
+// v0.4 도메인 섹션 요소
+const domainSection = document.getElementById('domain-section');
+const domainList = document.getElementById('domain-list');
+const domainForm = document.getElementById('domain-form');
+const domainInput = document.getElementById('domain-input');
+const domainMessage = document.getElementById('domain-message');
+const domainLoadingMessage = document.getElementById('domain-loading-message');
+const apiKeyLoadingMessage = document.getElementById('api-key-loading-message');
+
 // --- 3. UI 상태 변경 함수 ---
 function showDashboard(user) {
   authSection.classList.add('hidden');
@@ -111,14 +122,18 @@ logoutButton.addEventListener('click', async () => {
 // --- 5. 페이지 로드 시 세션 확인 ---
 // (가장 중요) 페이지가 로드되거나, 로그인이 감지되면 실행됩니다.
 // ...
+// ...
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' || event === 'INITIAL_USER') {
-    // 로그인 되었음!
     showDashboard(session.user);
-
-    // [!!! 추가된 부분 !!!]
-    // API 키 생성 버튼에 이벤트 리스너를 추가합니다.
     addApiKeyButtonListener(session); 
+
+    // [!!! v0.4 추가 !!!]
+    // 로그인 성공 시, DB에서 내 API 키와 도메인 목록을 불러옵니다.
+    loadCustomerData(session.user);
+
+  } else if (event === 'SIGNED_OUT') {
+// ...
 
   } else if (event === 'SIGNED_OUT') {
 // ...
@@ -193,5 +208,77 @@ function addApiKeyButtonListener(session) {
       apiKeyMessage.className = 'error-message';
       createKeyButton.disabled = false; // 실패 시 버튼 다시 활성화
     }
+  });
+}
+
+// ... (addApiKeyButtonListener 함수 끝) ...
+
+// --- 7. (v0.4) 고객 데이터 로드 (API 키, 도메인) ---
+
+/**
+ * RLS (행 수준 보안)를 이용해 'customers' 테이블에서
+ * 현재 로그인한 사용자의 API 키와 도메인 목록을 가져옵니다.
+ */
+async function loadCustomerData(user) {
+  apiKeyLoadingMessage.classList.remove('hidden');
+  domainLoadingMessage.classList.remove('hidden');
+  domainSection.classList.add('hidden');
+
+  try {
+    // 1. (보안) Supabase는 RLS 덕분에 'auth.uid() = user_id' 조건에
+    // 맞는 데이터만 자동으로 반환합니다.
+    const { data, error } = await supabaseClient
+      .from('customers')          // 'customers' 테이블에서
+      .select('api_key, allowed_domain') // 이 두 컬럼을 선택
+      .eq('user_id', user.id)     // 내 user_id와 일치하는
+      .single();                  // 단 하나의 줄(row)만 가져옴
+
+    if (error && error.code !== 'PGRST116') {
+      // 'PGRST116'는 "결과 없음(0건)" 오류입니다. 이건 정상입니다.
+      // 그 외의 DB 오류는 여기서 처리합니다.
+      throw new Error(`DB 조회 실패: ${error.message}`);
+    }
+
+    if (data) {
+      // --- 2. 고객 데이터가 있는 경우 (키 이미 발급) ---
+      displayApiKey(data.api_key); // API 키 표시
+      renderDomainList(data.allowed_domain || []); // 도메인 목록 표시
+
+      apiKeyLoadingMessage.classList.add('hidden');
+      domainLoadingMessage.classList.add('hidden');
+      domainSection.classList.remove('hidden');
+
+    } else {
+      // --- 3. 고객 데이터가 없는 경우 (신규 가입) ---
+      apiKeyLoadingMessage.classList.add('hidden');
+      apiKeyPrompt.classList.remove('hidden'); // 'API 키 생성하기' 버튼 표시
+      domainLoadingMessage.textContent = 'API 키를 먼저 생성해 주세요.';
+    }
+
+  } catch (error) {
+    console.error("고객 데이터 로드 오류:", error);
+    apiKeyLoadingMessage.textContent = error.message;
+    domainLoadingMessage.textContent = error.message;
+  }
+}
+
+/**
+ * (v0.4) 도메인 배열을 받아 화면에 목록(UI)을 그립니다.
+ */
+function renderDomainList(domains = []) {
+  domainList.innerHTML = ''; // 목록 비우기
+  if (domains.length === 0) {
+    domainList.innerHTML = '<p>아직 등록된 도메인이 없습니다.</p>';
+    return;
+  }
+
+  domains.forEach(domain => {
+    const item = document.createElement('div');
+    item.className = 'domain-item';
+    item.innerHTML = `
+      <span>${domain}</span>
+      <button class="delete-domain-btn" data-domain="${domain}">X</button>
+    `;
+    domainList.appendChild(item);
   });
 }

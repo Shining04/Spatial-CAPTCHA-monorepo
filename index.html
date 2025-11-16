@@ -44,21 +44,40 @@
       </div>
 
       <div class="dashboard-card">
-  <h2>🔑 내 API 키</h2>
+        <h2>🔑 내 API 키</h2>
+        <p id="api-key-loading-message">API 키 정보 로딩 중...</p>
 
-  <div id="api-key-display" class="hidden">
-    <p>API 키가 생성되었습니다. 이 키를 복사하여 사용하세요.</p>
-    <pre id="api-key-value"></pre>
-    <p class="warning">이 키는 한 번만 표시됩니다. 안전한 곳에 보관하세요.</p>
-  </div>
+        <div id="api-key-display" class="hidden">
+          <p>이 API 키를 복사하여 사이트에 설치하세요.</p>
+          <pre id="api-key-value"></pre>
+          <p class="warning">이 키는 한 번만 표시됩니다. 안전한 곳에 보관하세요.</p>
+        </div>
 
-  <div id="api-key-prompt">
-    <p>아직 API 키가 없습니다. 버튼을 눌러 생성하세요.</p>
-    <button id="create-key-button">API 키 생성하기</button>
-  </div>
+        <div id="api-key-prompt" class="hidden">
+          <p>아직 API 키가 없습니다. 버튼을 눌러 생성하세요.</p>
+          <button id="create-key-button">API 키 생성하기</button>
+          <p id="api-key-message" class="error-message"></p>
+        </div>
+      </div>
 
-  <p id="api-key-message" class="error-message"></p>
-</div>
+      <div id="domain-section" class="dashboard-card hidden">
+        <h2>🌐 허용된 도메인 관리</h2>
+        <p>
+          보안을 위해, 캡챠를 사용할 사이트의 도메인을 등록해야 합니다.
+          (예: `my-shop.com`, `blog.my-site.org`)
+        </p>
+
+        <div id="domain-list">
+          </div>
+        <p id="domain-loading-message">도메인 목록 로딩 중...</p>
+
+        <form id="domain-form">
+          <label for="domain-input">새 도메인 추가 (https:// 제외)</label>
+          <input type="text" id="domain-input" placeholder="my-customer-site.com" required>
+          <button type="submit" id="add-domain-button">추가</button>
+        </form>
+        <p id="domain-message" class="error-message"></p>
+      </div>
 
     </div>
 
