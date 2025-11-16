@@ -230,7 +230,6 @@ async function loadCustomerData(user) {
     const { data, error } = await supabaseClient
       .from('customers')          // 'customers' 테이블에서
       .select('api_key, allowed_domain') // 이 두 컬럼을 선택
-      .eq('user_id', user.id)     // 내 user_id와 일치하는
       .single();                  // 단 하나의 줄(row)만 가져옴
 
     if (error && error.code !== 'PGRST116') {
