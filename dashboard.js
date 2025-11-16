@@ -281,3 +281,92 @@ function renderDomainList(domains = []) {
     domainList.appendChild(item);
   });
 }
+
+// dashboard.js (파일 맨 마지막에 이어서 추가)
+
+// --- 8. (v0.4) 도메인 '쓰기' (추가/삭제) 기능 ---
+
+/**
+ * (v0.4) 현재 도메인 목록과 새 도메인을 받아,
+ * 'update-domains' Supabase 함수를 호출하여 DB를 업데이트합니다.
+ */
+async function updateDomainsInDatabase(newDomainsList) {
+  domainMessage.textContent = '도메인 목록 저장 중...';
+  domainMessage.className = 'success-message';
+  
+  try {
+    // 1. (보안) 현재 로그인한 사용자의 '인증 토큰' 가져오기
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError) throw sessionError;
+    const userToken = session.access_token;
+
+    // 2. 'update-domains' Supabase 함수를 호출합니다.
+    const { data, error: funcError } = await supabaseClient.functions.invoke(
+      'update-domains', // [!!!] 우리가 배포한 함수의 이름
+      {
+        headers: { 'Authorization': `Bearer ${userToken}` },
+        body: { newDomains: newDomainsList } // [!!!] 새 도메인 목록을 body에 담아 전송
+      }
+    );
+
+    if (funcError) throw new Error(`함수 호출 실패: ${funcError.message}`);
+    if (data.error) throw new Error(`도메인 업데이트 실패: ${data.error}`);
+
+    // 3. 성공! 함수가 반환한 최종 목록으로 UI를 다시 그립니다.
+    domainMessage.textContent = data.message;
+    renderDomainList(data.updatedDomains); // UI 새로고침
+
+  } catch (error) {
+    console.error('도메인 업데이트 오류:', error);
+    domainMessage.textContent = error.message;
+    domainMessage.className = 'error-message';
+  }
+}
+
+/**
+ * (v0.4) '도메인 추가' 폼 제출 이벤트 리스너
+ */
+domainForm.addEventListener('submit', async (e) => {
+  e.preventDefault(); // 폼 새로고침 방지
+  const newDomain = domainInput.value.trim();
+  if (!newDomain) return;
+
+  // 1. 현재 UI에 있는 도메인 목록 가져오기
+  let currentDomains = [];
+  document.querySelectorAll('.domain-item span').forEach(item => {
+    currentDomains.push(item.textContent);
+  });
+
+  // 2. 새 도메인 추가 (중복 방지)
+  if (currentDomains.includes(newDomain)) {
+    domainMessage.textContent = '이미 등록된 도메인입니다.';
+    domainMessage.className = 'error-message';
+    return;
+  }
+  currentDomains.push(newDomain);
+
+  // 3. DB 업데이트 함수 호출
+  await updateDomainsInDatabase(currentDomains);
+  domainInput.value = ''; // 입력창 비우기
+});
+
+/**
+ * (v0.4) '도메인 삭제' 버튼 클릭 이벤트 리스너 (이벤트 위임)
+ */
+domainList.addEventListener('click', async (e) => {
+  // 'X' 버튼 (class="delete-domain-btn")을 클릭했을 때만 작동
+  if (e.target.classList.contains('delete-domain-btn')) {
+    const domainToDelete = e.target.dataset.domain;
+    
+    // 1. 현재 UI에서 삭제할 도메인을 *제외*한 새 목록 생성
+    let currentDomains = [];
+    document.querySelectorAll('.domain-item span').forEach(item => {
+      if (item.textContent !== domainToDelete) {
+        currentDomains.push(item.textContent);
+      }
+    });
+
+    // 2. DB 업데이트 함수 호출
+    await updateDomainsInDatabase(currentDomains);
+  }
+});
