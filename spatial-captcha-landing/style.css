@@ -1,0 +1,285 @@
+/* style.css */
+
+/* --- 1. 색상 변수 및 다크 모드 설정 --- */
+:root {
+  /* 라이트 모드 (기본) */
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+  --bg-color: #ffffff;
+  --surface-color: #f8f9fa; /* 섹션 배경 */
+  --card-bg: #ffffff;       /* 카드/박스 배경 */
+  --text-main: #212529;
+  --text-sub: #555;
+  --border-color: #ddd;
+  --code-bg: #2b2b2b;
+  --code-text: #f8f8f2;
+}
+
+/* 사용자의 OS가 다크 모드일 경우 자동 적용 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-color: #4dabf7; /* 어두운 배경에서 더 잘 보이는 파란색 */
+    --primary-hover: #339af0;
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --card-bg: #252525;
+    --text-main: #e9ecef;
+    --text-sub: #adb5bd;
+    --border-color: #444;
+    /* 코드는 다크모드에서도 그대로 유지 */
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text-main);
+  background-color: var(--bg-color);
+  transition: background-color 0.3s, color 0.3s; /* 모드 전환 시 부드럽게 */
+}
+
+.container {
+  width: min(90%, 1100px);
+  margin: 0 auto;
+}
+
+/* --- 헤더 --- */
+header {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+}
+
+header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color);
+  color: #ffffff; /* 버튼 글씨는 항상 흰색 */
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.cta-button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* --- 섹션 공통 --- */
+.section {
+  padding: 5rem 0;
+  text-align: center;
+}
+
+.section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-main);
+}
+
+.section p {
+  font-size: 1.1rem;
+  color: var(--text-sub);
+  max-width: 650px;
+  margin: 0 auto 3rem auto;
+}
+
+/* 히어로 섹션 */
+.hero {
+  background-color: var(--surface-color);
+  padding: 6rem 0;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  color: var(--text-main);
+}
+
+.hero .lead {
+  font-size: 1.25rem;
+  color: var(--text-sub);
+  margin-bottom: 2rem;
+}
+
+/* 데모 섹션 */
+.demo-box {
+  max-width: 800px;
+  margin: 0 auto;
+  border: 1px solid var(--border-color);
+  border-radius: 1.5rem;
+  background: var(--card-bg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  min-height: 300px; /* 로딩 중 최소 높이 확보 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 로딩 텍스트 스타일 */
+.loading-text {
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* 특징 섹션 */
+.features {
+  background-color: var(--bg-color);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  text-align: left;
+}
+
+.feature-item {
+  padding: 2rem;
+  background: var(--surface-color);
+  border-radius: 8px;
+  border: 1px solid transparent; /* 다크모드 경계선 대비 */
+}
+
+@media (prefers-color-scheme: dark) {
+  .feature-item {
+    border-color: var(--border-color);
+  }
+}
+
+.feature-item h3 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.feature-item p {
+  margin: 0; /* 부모 p 스타일 덮어쓰기 */
+  font-size: 1rem;
+}
+
+/* 설치 방법 섹션 */
+.how-to {
+  background-color: var(--surface-color);
+}
+
+.how-to pre {
+  display: block;
+  background-color: var(--code-bg);
+  color: var(--code-text);
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: left;
+  overflow-x: auto;
+  max-width: 700px;
+  margin: 1rem auto;
+  font-family: "Courier New", Courier, monospace;
+  border: 1px solid var(--border-color);
+}
+
+/* 가격 섹션 */
+.pricing {
+  background-color: var(--bg-color);
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.pricing-plan {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  background-color: var(--card-bg);
+}
+
+.pricing-plan h3 {
+  font-size: 1.5rem;
+  color: var(--text-main);
+}
+
+.pricing-plan .price {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 1rem 0;
+  color: var(--text-main);
+}
+
+.pricing-plan p {
+  margin-bottom: 1rem; /* 간격 조정 */
+}
+
+/* CTA 섹션 */
+.cta {
+  background-color: #212529; /* CTA는 다크모드 상관없이 어둡게 유지 */
+  color: #ffffff;
+}
+
+.cta h2 {
+  color: #ffffff;
+}
+.cta p {
+  color: #ccc;
+}
+
+/* Footer (새로 추가됨) */
+footer {
+  background-color: var(--surface-color);
+  padding: 3rem 0;
+  border-top: 1px solid var(--border-color);
+  margin-top: 0;
+}
+
+footer .footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}
+
+footer a {
+  color: var(--text-sub);
+  text-decoration: none;
+  margin: 0 0.5rem;
+}
+
+footer a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
