@@ -3,24 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spatial-CAPTCHA - 봇은 풀 수 없는 3D 캡챠</title>
-  <link rel="stylesheet" href="style.css">
+  
+  <title>Spatial-CAPTCHA - 봇은 풀 수 없는 3D 보안 솔루션</title>
+  <meta name="description" content="2D 봇은 절대 풀 수 없는 3D 공간 인식 캡챠. 단 2줄의 코드로 웹사이트 보안을 강화하세요.">
+  
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Spatial-CAPTCHA - 차세대 3D 보안">
+  <meta property="og:description" content="지루한 이미지 찾기는 그만. 봇은 막고 사람은 즐거운 3D 캡챠를 만나보세요.">
+  <meta property="og:image" content="https://via.placeholder.com/1200x630?text=Spatial+CAPTCHA"> <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
 </head>
 <body>
 
   <header>
     <div class="container">
       <a href="#" class="logo">🔐 Spatial-CAPTCHA</a>
-      <a href="#cta" class="cta-button">지금 시작하기</a>
+      <nav>
+        <a href="#demo" class="cta-button" style="background: transparent; color: var(--text-main); margin-right: 10px;">데모</a>
+        <a href="#cta" class="cta-button">지금 시작하기</a>
+      </nav>
     </div>
   </header>
 
   <main>
-
     <section class="section hero">
       <div class="container">
         <h1>봇은 풀 수 없습니다.<br>사람은 쉽게 풉니다.</h1>
-        <p class="lead">가장 진보된 3D 공간 인식 기술로 웹사이트를 안전하게 보호하세요.</p>
+        <p class="lead">가장 진보된 3D 공간 인식 기술로 웹사이트를 안전하게 보호하세요.<br>복잡한 설정 없이 2줄이면 충분합니다.</p>
         <a href="#demo" class="cta-button">라이브 데모 체험하기</a>
       </div>
     </section>
@@ -28,13 +37,14 @@
     <section id="demo" class="section demo">
       <div class="container">
         <h2>라이브 데모</h2>
-        <p>Spatial-CAPTCHA가 실제로 어떻게 동작하는지 지금 바로 경험해 보세요.</p>
+        <p>Spatial-CAPTCHA가 실제로 어떻게 동작하는지 확인해 보세요.</p>
         
         <div class="demo-box">
-          <div 
-            class="spatial-captcha" 
-            data-api-key="sk-spatial-captcha-123456789" style="width: 100%; margin: auto;"
-          ></div>
+          <div class="spatial-captcha" 
+               data-api-key="sk-spatial-captcha-123456789" 
+               style="width: 100%; margin: auto; text-align: center;">
+            <span class="loading-text">🛡️ 3D 보안 모듈을 불러오는 중입니다...</span>
+          </div>
         </div>
       </div>
     </section>
@@ -42,20 +52,20 @@
     <section class="section features">
       <div class="container">
         <h2>비교할 수 없는 보안성</h2>
-        <p>단순한 이미지/텍스트 인식을 넘어선, 실제 공간 지각 능력을 요구합니다.</p>
+        <p>단순한 텍스트 입력을 넘어선, 실제 공간 지각 능력을 요구합니다.</p>
         
         <div class="features-grid">
           <div class="feature-item">
-            <h3>강력한 봇 차단</h3>
-            <p>2D 기반의 AI는 3D 모델의 공간적 관계를 추론하기 매우 어렵습니다. 99.9%의 자동화 봇을 차단합니다.</p>
+            <h3>🤖 강력한 봇 차단</h3>
+            <p>2D 기반의 AI 스크립트는 3D 모델의 깊이와 회전을 이해하지 못합니다. 자동화 공격을 99.9% 차단합니다.</p>
           </div>
           <div class="feature-item">
-            <h3>쉬운 설치</h3>
-            <p>단 두 줄의 코드를 복사/붙여넣기 하는 것만으로 사이트의 보안 등급을 즉시 업그레이드할 수 있습니다.</p>
+            <h3>⚡ 1분 설치</h3>
+            <p>복잡한 백엔드 설정이 필요 없습니다. 프론트엔드에 코드 두 줄만 붙여넣으면 보안이 적용됩니다.</p>
           </div>
           <div class="feature-item">
-            <h3>뛰어난 사용자 경험</h3>
-            <p>지루하고 알아보기 힘든 캡챠는 이제 그만. 사용자는 3D 모델을 회전하며 재미있는 경험을 하게 됩니다.</p>
+            <h3>🎮 게이미피케이션</h3>
+            <p>사용자를 귀찮게 하는 신호등 찾기 대신, 3D 모델을 조작하는 재미있는 경험을 제공하여 이탈률을 줄입니다.</p>
           </div>
         </div>
       </div>
@@ -63,30 +73,35 @@
 
     <section class="section how-to">
       <div class="container">
-        <h2>2줄이면 설치 끝</h2>
+        <h2>개발자 친화적인 설치</h2>
         <p>사이트의 HTML에 아래 코드를 복사하여 붙여넣으세요.</p>
         
-        <h3>1. 캡챠를 표시할 DIV 추가하기</h3>
-        <pre><code>&lt;div class="spatial-captcha" data-api-key="[발급받은 API 키]"&gt;&lt;/div&gt;</code></pre>
+        <h3>1. 캡챠 컨테이너 추가</h3>
+        <pre><code>&lt;div class="spatial-captcha" data-api-key="YOUR_API_KEY"&gt;&lt;/div&gt;</code></pre>
 
-        <h3>2. 스크립트 태그 추가하기</h3>
+        <h3>2. SDK 스크립트 로드</h3>
         <pre><code>&lt;script src="https://spatial-captcha-frontend.vercel.app/widget.js" defer&gt;&lt;/script&gt;</code></pre>
+        
+        <p style="margin-top: 2rem; font-size: 0.9rem;">
+          <a href="#" style="color: var(--primary-color);">👉 상세 개발자 문서(Docs) 보기</a>
+        </p>
       </div>
     </section>
 
     <section class="section pricing">
       <div class="container">
-        <h2>간단한 가격 플랜</h2>
+        <h2>합리적인 요금제</h2>
         <div class="pricing-grid">
           <div class="pricing-plan">
-            <h3>Free (무료)</h3>
+            <h3>🌱 Hobby</h3>
             <p class="price">₩0</p>
-            <p>월 1,000회 검증<br>개인 프로젝트용</p>
+            <p>월 1,000회 검증 무료<br>개인 프로젝트 및 테스트용<br>커뮤니티 지원</p>
           </div>
-          <div class="pricing-plan">
-            <h3>Pro (프로)</h3>
-            <p class="price">₩10,000 / 월</p>
-            <p>월 100,000회 검증<br>상업용 웹사이트</p>
+          <div class="pricing-plan" style="border: 2px solid var(--primary-color); position: relative;">
+            <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: #fff; padding: 2px 10px; font-size: 0.8rem; border-radius: 20px;">BEST</div>
+            <h3>🚀 Pro</h3>
+            <p class="price">₩10,000 <span style="font-size: 1rem; font-weight: 400;">/ 월</span></p>
+            <p>월 100,000회 검증<br>상업용 웹사이트<br>이메일 기술 지원<br>대시보드 제공</p>
           </div>
         </div>
       </div>
@@ -94,12 +109,28 @@
 
     <section id="cta" class="section cta">
       <div class="container">
-        <h2>지금 바로 시작하세요</h2>
-        <p>몇 분 만에 웹사이트의 보안을 강화하고 사용자 경험을 업그레이드하세요.</p>
-        <a href="https://spatial-captcha-dashboard.vercel.app" class="cta-button">무료로 API 키 발급받기</a>
+        <h2>웹사이트 보안, 이제 미루지 마세요</h2>
+        <p>이메일 하나로 즉시 API 키를 발급받을 수 있습니다.</p>
+        <a href="https://spatial-captcha-dashboard.vercel.app" class="cta-button">무료로 시작하기</a>
       </div>
     </section>
   </main>
+
+  <footer>
+    <div class="container footer-content">
+      <div class="copyright">
+        &copy; 2024 Spatial-CAPTCHA. All rights reserved.
+      </div>
+      <div class="links">
+        <a href="#">서비스 이용약관</a> | 
+        <a href="#">개인정보처리방침</a> | 
+        <a href="mailto:support@spatial-captcha.com">문의하기</a>
+      </div>
+      <p style="font-size: 0.8rem; opacity: 0.7;">
+        Spatial-CAPTCHA는 1인 개발자와 스타트업을 위한 최적의 보안 솔루션을 연구합니다.
+      </p>
+    </div>
+  </footer>
 
   <script 
     src="https://spatial-captcha-frontend.vercel.app/widget.js" defer
